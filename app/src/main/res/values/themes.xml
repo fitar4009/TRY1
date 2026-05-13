@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <style name="Theme.KalaArichta" parent="Theme.Material3.Dark">
+    <style name="Theme.KalaArichta" parent="Theme.Material3.Dark.NoActionBar">
         <item name="colorPrimary">@color/accent_green</item>
         <item name="colorPrimaryDark">@color/background_dark</item>
         <item name="colorAccent">@color/accent_green</item>
