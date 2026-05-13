@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="utf-8"?>
+<animated-vector
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:aapt="http://schemas.android.com/aapt">
+
+    <aapt:attr name="android:drawable">
+        <vector
+            android:width="180dp"
+            android:height="180dp"
+            android:viewportWidth="180"
+            android:viewportHeight="180">
+
+            <!-- Outer pulse ring -->
+            <path
+                android:name="outerRing"
+                android:pathData="M90,90m-80,0a80,80 0 1,0 160,0a80,80 0 1,0 -160,0"
+                android:strokeColor="#1A00E676"
+                android:strokeWidth="8"
+                android:fillColor="@android:color/transparent" />
+
+            <!-- Mid ring -->
+            <path
+                android:pathData="M90,90m-60,0a60,60 0 1,0 120,0a60,60 0 1,0 -120,0"
+                android:strokeColor="#3300E676"
+                android:strokeWidth="4"
+                android:fillColor="@android:color/transparent" />
+
+            <!-- Mic body -->
+            <path
+                android:pathData="M90,55 C82,55 76,61 76,69 L76,91 C76,99 82,105 90,105 C98,105 104,99 104,91 L104,69 C104,61 98,55 90,55 Z"
+                android:fillColor="#00E676" />
+
+            <!-- Mic stand -->
+            <path
+                android:pathData="M68,88 C68,100 78,112 90,112 C102,112 112,100 112,88"
+                android:strokeColor="#00E676"
+                android:strokeWidth="4"
+                android:fillColor="@android:color/transparent"
+                android:strokeLineCap="round" />
+
+            <!-- Mic pole -->
+            <path
+                android:pathData="M90,112 L90,122"
+                android:strokeColor="#00E676"
+                android:strokeWidth="4"
+                android:strokeLineCap="round" />
+
+            <!-- Base -->
+            <path
+                android:pathData="M78,122 L102,122"
+                android:strokeColor="#00E676"
+                android:strokeWidth="4"
+                android:strokeLineCap="round" />
+
+        </vector>
+    </aapt:attr>
+
+    <!-- Pulse the outer ring opacity -->
+    <target android:name="outerRing">
+        <aapt:attr name="android:animation">
+            <objectAnimator
+                android:propertyName="strokeAlpha"
+                android:valueFrom="0.1"
+                android:valueTo="0.8"
+                android:duration="1000"
+                android:repeatCount="infinite"
+                android:repeatMode="reverse"
+                android:interpolator="@android:interpolator/decelerate_quad" />
+        </aapt:attr>
+    </target>
+
+</animated-vector>

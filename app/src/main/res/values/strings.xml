@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- App name (Aramaic: "Long Call" / "Extended Voice") -->
+    <string name="app_name">קלא אריכתא</string>
+
+    <!-- Status labels -->
+    <string name="status_ready">מוכן לחיוג קולי</string>
+    <string name="status_listening">מאזין…</string>
+    <string name="status_processing">מעבד…</string>
+    <string name="status_loading_model">טוען מודל זיהוי דיבור…</string>
+
+    <!-- Transcript -->
+    <string name="transcript_hint">אמור שם איש קשר או מספר טלפון</string>
+
+    <!-- Buttons -->
+    <string name="btn_stop_listening">הפסק האזנה ✋</string>
+    <string name="btn_retry">נסה שוב 🎤</string>
+
+    <!-- Disambiguation -->
+    <string name="disambiguation_prompt">נמצאו מספר אנשי קשר – בחר:</string>
+    <string name="say_number_prompt">🎤 אמור מספר הפריט (אחד, שתיים, שלוש…)</string>
+    <string name="selection_not_understood">לא הבנתי: \"%s\" – אמור שוב או לחץ</string>
+
+    <!-- Confirmation dialog -->
+    <string name="confirm_call_title">חיוג</string>
+    <string name="confirm_call_message">להתקשר אל %1$s\n%2$s?</string>
+    <string name="call">חייג 📞</string>
+    <string name="cancel_try_again">בטל / נסה שוב</string>
+
+    <!-- Errors -->
+    <string name="no_audio_detected">לא זוהה קול – נסה שוב</string>
+    <string name="no_speech_detected">לא זוהה דיבור – נסה שוב</string>
+    <string name="no_match_title">לא נמצא איש קשר</string>
+    <string name="no_match_message">לא נמצאה התאמה עבור: \"%s\"</string>
+    <string name="try_again">נסה שוב</string>
+    <string name="no_contacts_title">אין אנשי קשר</string>
+    <string name="no_contacts_message">לא נמצאו אנשי קשר.\n\nצור קובץ contacts.txt ב:\n%s\n\nפורמט:\nשם=מספר</string>
+    <string name="call_permission_error">חסרה הרשאת חיוג</string>
+    <string name="model_load_error">שגיאה בטעינת מודל: %s</string>
+
+    <!-- Permissions -->
+    <string name="perm_required_title">נדרשת הרשאה</string>
+    <string name="perm_required_message">האפליקציה דורשת גישה למיקרופון לצורך זיהוי דיבור.</string>
+
+    <!-- Model -->
+    <string name="no_model_title">לא נבחר מודל</string>
+    <string name="no_model_message">יש לבחור קובץ מודל GGUF (whisper) בהגדרות.\n\nהנח את הקובץ ב:\n%s\n\nאו בחר ממיקום אחר.</string>
+    <string name="open_settings">פתח הגדרות</string>
+    <string name="no_model_selected">לא נבחר מודל – לחץ לבחירה</string>
+    <string name="model_selected">מודל נבחר: %s</string>
+
+    <!-- Settings -->
+    <string name="settings_title">הגדרות</string>
+    <string name="pref_category_model">מודל דיבור-לטקסט</string>
+    <string name="pref_model_path_title">קובץ מודל Whisper (GGUF)</string>
+    <string name="pref_category_audio">שמע</string>
+    <string name="pref_audio_focus_title">השתלטות מיקוד שמע</string>
+    <string name="pref_audio_focus_summary">השתקת/הורדת עוצמת מדיה אחרת בעת האזנה</string>
+    <string name="pref_audio_duck_title">הורדת עוצמה בלבד (לא השתקה)</string>
+    <string name="pref_audio_duck_summary">כן = מוריד עוצמת הרדיו; לא = משתיק לחלוטין</string>
+    <string name="pref_category_matching">זיהוי אנשי קשר</string>
+    <string name="pref_match_threshold_title">סף התאמה מינימלי</string>
+    <string name="pref_match_threshold_summary">ציון נמוך = התאמה גמישה יותר (מומלץ: 60)</string>
+
+</resources>

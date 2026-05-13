@@ -1,0 +1,96 @@
+name: Build APK
+
+on:
+  push:
+    branches: [ main, master ]
+  pull_request:
+    branches: [ main, master ]
+  workflow_dispatch:
+
+jobs:
+  build:
+    name: Build Release APK
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive  # Important: whisper.cpp may be a git submodule
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+          cache: gradle
+
+      - name: Setup Android SDK
+        uses: android-actions/setup-android@v3
+
+      - name: Install NDK
+        run: |
+          echo "y" | $ANDROID_SDK_ROOT/cmdline-tools/latest/bin/sdkmanager \
+            "ndk;26.3.11579264" \
+            "cmake;3.22.1"
+
+      - name: Grant execute permission for gradlew
+        run: chmod +x gradlew
+
+      - name: Download fresh Gradle wrapper jar
+        run: |
+          curl -L -o gradle/wrapper/gradle-wrapper.jar \
+            "https://github.com/gradle/gradle/raw/v8.6.0/gradle/wrapper/gradle-wrapper.jar"
+          echo "✓ Gradle wrapper jar downloaded"
+      - name: Force AndroidX properties
+        run: |
+          echo "android.useAndroidX=true" > gradle.properties
+          echo "android.enableJetifier=true" >> gradle.properties
+          echo "✓ gradle.properties overwritten with AndroidX settings"
+
+      # Verify whisper.cpp sources are present (must be manually added or submoduled)
+      - name: Clone whisper.cpp
+        run: |
+          rm -rf app/src/main/cpp/whisper
+          git clone --depth=1 https://github.com/ggerganov/whisper.cpp app/src/main/cpp/whisper
+          echo "✓ whisper.cpp cloned"
+
+      - name: Debug whisper structure
+        run: |
+          find app/src/main/cpp/whisper -name "*.c" -o -name "*.cpp" | head -30
+          echo "---"
+          cat app/src/main/cpp/whisper/CMakeLists.txt | head -30
+      
+      - name: Build Debug APK
+        run: ./gradlew assembleDebug --stacktrace
+        env:
+          ANDROID_NDK_HOME: ${{ env.ANDROID_SDK_ROOT }}/ndk/26.3.11579264
+
+      - name: Build Release APK (unsigned)
+        run: ./gradlew assembleRelease --stacktrace
+        env:
+          ANDROID_NDK_HOME: ${{ env.ANDROID_SDK_ROOT }}/ndk/26.3.11579264
+
+      - name: Upload Debug APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: kala-arichta-debug
+          path: app/build/outputs/apk/debug/app-debug.apk
+          retention-days: 14
+
+      - name: Upload Release APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: kala-arichta-release-unsigned
+          path: app/build/outputs/apk/release/app-release-unsigned.apk
+          retention-days: 14
+
+      - name: Build summary
+        run: |
+          echo "## Build Artifacts" >> $GITHUB_STEP_SUMMARY
+          echo "| File | Size |" >> $GITHUB_STEP_SUMMARY
+          echo "|------|------|" >> $GITHUB_STEP_SUMMARY
+          for f in app/build/outputs/apk/**/*.apk; do
+            size=$(du -sh "$f" | cut -f1)
+            echo "| $(basename $f) | $size |" >> $GITHUB_STEP_SUMMARY
+          done

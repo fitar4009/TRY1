@@ -1,0 +1,29 @@
+*.iml
+.gradle/
+.idea/
+/local.properties
+/.idea/caches
+/.idea/libraries
+/.idea/modules.xml
+/.idea/workspace.xml
+/.idea/navEditor.xml
+/.idea/assetWizardSettings.xml
+.DS_Store
+/build
+/captures
+.externalNativeBuild
+.cxx
+local.properties
+
+# Android build output
+app/build/
+
+# Whisper model files (large - do not commit)
+**/*.gguf
+**/*.bin
+app/src/main/cpp/whisper/*.c
+app/src/main/cpp/whisper/*.cpp
+app/src/main/cpp/whisper/*.h
+
+# Keep the directory placeholder
+!app/src/main/cpp/whisper/.gitkeep

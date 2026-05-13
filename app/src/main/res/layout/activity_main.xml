@@ -1,0 +1,136 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.coordinatorlayout.widget.CoordinatorLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:layoutDirection="rtl"
+    android:background="@color/background_dark">
+
+    <!-- AppBar -->
+    <com.google.android.material.appbar.AppBarLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <androidx.appcompat.widget.Toolbar
+            android:id="@+id/toolbar"
+            android:layout_width="match_parent"
+            android:layout_height="?attr/actionBarSize"
+            android:background="@color/surface_dark"
+            app:titleTextColor="@color/text_primary"
+            app:layout_scrollFlags="scroll|enterAlways" />
+
+    </com.google.android.material.appbar.AppBarLayout>
+
+    <!-- Main content -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        android:gravity="center"
+        android:padding="24dp"
+        app:layout_behavior="@string/appbar_scrolling_view_behavior">
+
+        <!-- Listening pulse animation ring -->
+        <ImageView
+            android:id="@+id/listeningPulse"
+            android:layout_width="180dp"
+            android:layout_height="180dp"
+            android:src="@drawable/ic_mic_pulse"
+            android:visibility="gone"
+            tools:visibility="visible" />
+
+        <!-- Status label -->
+        <TextView
+            android:id="@+id/statusText"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="24dp"
+            android:text="@string/status_ready"
+            android:textColor="@color/text_primary"
+            android:textSize="22sp"
+            android:textStyle="bold"
+            android:gravity="center"
+            android:fontFamily="sans-serif-medium" />
+
+        <!-- Volume / VU meter bar -->
+        <ProgressBar
+            android:id="@+id/vuMeter"
+            style="?android:attr/progressBarStyleHorizontal"
+            android:layout_width="match_parent"
+            android:layout_height="8dp"
+            android:layout_marginTop="16dp"
+            android:max="100"
+            android:progressTint="@color/accent_green"
+            android:progressBackgroundTint="@color/surface_elevated"
+            android:visibility="gone"
+            tools:visibility="visible"
+            tools:progress="60" />
+
+        <!-- Spinner for processing -->
+        <ProgressBar
+            android:id="@+id/progressBar"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:layout_marginTop="16dp"
+            android:indeterminateTint="@color/accent_green"
+            android:visibility="gone"
+            tools:visibility="gone" />
+
+        <!-- Real-time transcript box -->
+        <com.google.android.material.card.MaterialCardView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="24dp"
+            app:cardBackgroundColor="@color/surface_elevated"
+            app:cardCornerRadius="12dp"
+            app:cardElevation="4dp">
+
+            <TextView
+                android:id="@+id/transcriptText"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:minHeight="80dp"
+                android:padding="16dp"
+                android:textColor="@color/text_primary"
+                android:textSize="20sp"
+                android:gravity="center|end"
+                android:textDirection="rtl"
+                android:hint="@string/transcript_hint"
+                android:textColorHint="@color/text_secondary"
+                tools:text="התקשר למשה כהן" />
+
+        </com.google.android.material.card.MaterialCardView>
+
+        <!-- STOP button (large, accessible for HU) -->
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnStopListening"
+            android:layout_width="match_parent"
+            android:layout_height="72dp"
+            android:layout_marginTop="32dp"
+            android:text="@string/btn_stop_listening"
+            android:textSize="20sp"
+            android:textStyle="bold"
+            app:backgroundTint="@color/error_red"
+            app:cornerRadius="12dp"
+            android:visibility="gone"
+            tools:visibility="visible" />
+
+        <!-- RETRY button -->
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnRetry"
+            style="@style/Widget.Material3.Button.OutlinedButton"
+            android:layout_width="match_parent"
+            android:layout_height="64dp"
+            android:layout_marginTop="16dp"
+            android:text="@string/btn_retry"
+            android:textSize="18sp"
+            app:strokeColor="@color/accent_green"
+            android:textColor="@color/accent_green"
+            app:cornerRadius="12dp"
+            android:visibility="visible" />
+
+    </LinearLayout>
+
+</androidx.coordinatorlayout.widget.CoordinatorLayout>
