@@ -79,4 +79,5 @@ dependencies {
     implementation(libs.kotlinx.coroutines.android)
     implementation(libs.androidx.preference.ktx)
     implementation(libs.fuzzywuzzy)
+    implementation("com.microsoft.onnxruntime:onnxruntime-android:1.17.3")
 }

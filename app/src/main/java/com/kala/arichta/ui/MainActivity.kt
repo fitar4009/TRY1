@@ -24,7 +24,8 @@ import com.kala.arichta.contacts.ContactRepository
 import com.kala.arichta.databinding.ActivityMainBinding
 import com.kala.arichta.nlp.ContactMatcher
 import com.kala.arichta.nlp.HebrewNumberParser
-import com.kala.arichta.whisper.WhisperEngine
+import com.kala.arichta.engine.EngineFactory
+import com.kala.arichta.engine.SpeechEngine
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -43,7 +44,7 @@ class MainActivity : AppCompatActivity() {
 
     // Core components
     private lateinit var prefs: AppPreferences
-    private lateinit var whisper: WhisperEngine
+    private lateinit var whisper: SpeechEngine
     private lateinit var recorder: AudioRecorder
     private lateinit var focusManager: AudioFocusManager
     private lateinit var contactRepo: ContactRepository
@@ -59,7 +60,7 @@ class MainActivity : AppCompatActivity() {
         setContentView(binding.root)
 
         prefs         = AppPreferences(this)
-        whisper       = WhisperEngine()
+        whisper       = EngineFactory.create(prefs.modelPath)
         recorder      = AudioRecorder(this)
         focusManager  = AudioFocusManager(this)
         contactRepo   = ContactRepository(this)
