@@ -23,6 +23,7 @@ import com.kala.arichta.contacts.Contact
 import com.kala.arichta.contacts.ContactRepository
 import com.kala.arichta.databinding.ActivityMainBinding
 import com.kala.arichta.nlp.ContactMatcher
+import com.kala.arichta.nlp.HebrewCommandParser
 import com.kala.arichta.nlp.HebrewNumberParser
 import com.kala.arichta.engine.EngineFactory
 import com.kala.arichta.engine.SpeechEngine
@@ -301,8 +302,12 @@ class MainActivity : AppCompatActivity() {
                     return@launch
                 }
 
-                // Route: number or name?
-                processTranscript(rawText)
+                // Strip natural-language call command (e.g. "התקשר ל…" → "…")
+                val target = HebrewCommandParser.extractTarget(rawText)
+                if (HebrewCommandParser.hasCallIntent(rawText) && target != rawText) {
+                    Log.i(TAG, "Command stripped: '$rawText' → target: '$target'")
+                }
+                processTranscript(target)
 
             } catch (e: SecurityException) {
                 Log.e(TAG, "Security exception during recording: ${e.message}")
