@@ -122,7 +122,8 @@ class MainActivity : AppCompatActivity() {
             recorder.stopRecording()
         }
 
-        binding.btnTypeInput.setOnClickListener { showTextInputDialog() }
+        // btnTypeInput wired safely below via findViewById
+        findViewById<android.view.View?>(R.id.btnTypeInput)?.setOnClickListener { showTextInputDialog() }
         binding.btnRetry.setOnClickListener {
             startListeningSession()
         }
