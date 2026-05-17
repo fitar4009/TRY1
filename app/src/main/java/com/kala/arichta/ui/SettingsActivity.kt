@@ -7,6 +7,7 @@ import android.os.Bundle
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
+import androidx.documentfile.provider.DocumentFile
 import androidx.lifecycle.lifecycleScope
 import androidx.preference.Preference
 import androidx.preference.PreferenceFragmentCompat
@@ -20,7 +21,6 @@ import kotlinx.coroutines.withContext
 import java.io.File
 
 class SettingsActivity : AppCompatActivity() {
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_settings)
@@ -34,10 +34,8 @@ class SettingsActivity : AppCompatActivity() {
                 .commit()
         }
     }
-
     override fun onSupportNavigateUp(): Boolean {
-        onBackPressedDispatcher.onBackPressed()
-        return true
+        onBackPressedDispatcher.onBackPressed(); return true
     }
 }
 
@@ -48,151 +46,176 @@ class SettingsFragment : PreferenceFragmentCompat() {
     override fun onCreatePreferences(savedInstanceState: Bundle?, rootKey: String?) {
         setPreferencesFromResource(R.xml.preferences, rootKey)
         prefs = AppPreferences(requireContext())
-        setupModelPicker()
+        setupGgmlPicker()
+        setupOnnxFolderPicker()
         setupAudioToggles()
     }
 
-    // ── Model picker ─────────────────────────────────────────────────────────
+    // ── GGML model picker (single .bin / .gguf file) ─────────────────────────
 
-    private fun setupModelPicker() {
-        findPreference<Preference>("pick_model")?.setOnPreferenceClickListener {
-            openFilePicker()
+    private fun setupGgmlPicker() {
+        findPreference<Preference>("pick_model_ggml")?.setOnPreferenceClickListener {
+            ggmlPickerLauncher.launch(
+                Intent(Intent.ACTION_OPEN_DOCUMENT).apply {
+                    addCategory(Intent.CATEGORY_OPENABLE)
+                    type = "*/*"
+                }
+            )
             true
         }
-        refreshModelSummary()
+        refreshGgmlSummary()
     }
 
-    private fun openFilePicker() {
-        filePickerLauncher.launch(
-            Intent(Intent.ACTION_OPEN_DOCUMENT).apply {
-                addCategory(Intent.CATEGORY_OPENABLE)
-                type = "*/*"
-                putExtra(Intent.EXTRA_MIME_TYPES, arrayOf("application/octet-stream", "*/*"))
-            }
-        )
-    }
-
-    private val filePickerLauncher = registerForActivityResult(
+    private val ggmlPickerLauncher = registerForActivityResult(
         ActivityResultContracts.StartActivityForResult()
     ) { result ->
         if (result.resultCode != Activity.RESULT_OK) return@registerForActivityResult
-        val uri = result.data?.data ?: return@registerForActivityResult
+        val uri      = result.data?.data ?: return@registerForActivityResult
         val fileName = resolveFileName(uri) ?: "model.bin"
-        val ext = fileName.substringAfterLast('.', "").lowercase()
+        val ext      = fileName.substringAfterLast('.', "").lowercase()
 
-        when (ext) {
-            "onnx" -> handleOnnxPick(uri, fileName)
-            "bin", "gguf" -> handleGgmlPick(uri, fileName)
-            else -> Toast.makeText(
-                requireContext(),
-                "Select encoder_model.onnx  or a  .bin / .gguf  GGML file",
-                Toast.LENGTH_LONG
-            ).show()
+        if (ext != "bin" && ext != "gguf") {
+            Toast.makeText(requireContext(), "Please select a .bin or .gguf file", Toast.LENGTH_LONG).show()
+            return@registerForActivityResult
         }
-    }
 
-    // ── GGML path ────────────────────────────────────────────────────────────
-
-    private fun handleGgmlPick(uri: Uri, fileName: String) {
-        setPickerSummary("Copying GGML model…")
+        findPreference<Preference>("pick_model_ggml")?.summary = "Copying…"
         lifecycleScope.launch {
             val dest = copyFile(uri, fileName)
             if (dest != null) {
                 prefs.modelPath = dest.absolutePath
-                refreshModelSummary()
+                refreshGgmlSummary()
+                refreshOnnxSummary()
                 Toast.makeText(requireContext(), "GGML model ready: ${dest.name}", Toast.LENGTH_SHORT).show()
             } else {
-                refreshModelSummary()
+                refreshGgmlSummary()
                 Toast.makeText(requireContext(), "Copy failed — try again", Toast.LENGTH_LONG).show()
             }
         }
     }
 
-    // ── ONNX path ────────────────────────────────────────────────────────────
-
-    private fun handleOnnxPick(uri: Uri, fileName: String) {
-        if (!fileName.contains("encoder", ignoreCase = true)) {
-            Toast.makeText(
-                requireContext(),
-                "Please pick encoder_model.onnx.\n" +
-                "Place encoder_model.onnx, decoder_model.onnx and vocab.json in the same folder first.",
-                Toast.LENGTH_LONG
-            ).show()
-            return
+    private fun refreshGgmlSummary() {
+        val path = prefs.modelPath
+        val active = path.isNotEmpty() && !path.endsWith(".onnx")
+        findPreference<Preference>("pick_model_ggml")?.summary = when {
+            active -> "✓ Active: ${File(path).name}"
+            else   -> "בחר קובץ .bin או .gguf"
         }
+    }
 
-        setPickerSummary("Copying ONNX model files…")
+    // ── ONNX folder picker (folder containing encoder + decoder + vocab) ──────
+
+    private fun setupOnnxFolderPicker() {
+        findPreference<Preference>("pick_model_onnx")?.setOnPreferenceClickListener {
+            // ACTION_OPEN_DOCUMENT_TREE grants access to the entire folder —
+            // the only correct way to read multiple files from the same directory.
+            onnxFolderLauncher.launch(null)
+            true
+        }
+        refreshOnnxSummary()
+    }
+
+    private val onnxFolderLauncher = registerForActivityResult(
+        ActivityResultContracts.OpenDocumentTree()
+    ) { treeUri: Uri? ->
+        if (treeUri == null) return@registerForActivityResult
+
+        // Persist permission so we can re-read the folder after reboot if needed
+        requireContext().contentResolver.takePersistableUriPermission(
+            treeUri,
+            Intent.FLAG_GRANT_READ_URI_PERMISSION
+        )
+
+        findPreference<Preference>("pick_model_onnx")?.summary = "Copying ONNX files…"
 
         lifecycleScope.launch {
-            val encoderDest = copyFile(uri, "encoder_model.onnx")
-            if (encoderDest == null) {
-                refreshModelSummary()
-                Toast.makeText(requireContext(), "Failed to copy encoder_model.onnx", Toast.LENGTH_LONG).show()
-                return@launch
-            }
+            val result = copyOnnxFolder(treeUri)
+            refreshOnnxSummary()
+            refreshGgmlSummary()
 
-            val siblings      = findSiblingFiles(uri)
-            val decoderCopied = copySibling(siblings, "decoder_model.onnx")
-            val vocabCopied   = copySibling(siblings, "vocab.json")
-
-            prefs.modelPath = encoderDest.absolutePath
-            refreshModelSummary()
-
-            val missing = buildList {
-                if (!decoderCopied) add("decoder_model.onnx")
-                if (!vocabCopied)   add("vocab.json")
-            }
-
-            if (missing.isEmpty()) {
-                Toast.makeText(requireContext(),
-                    "ONNX model ready (encoder + decoder + vocab)", Toast.LENGTH_SHORT).show()
-            } else {
-                Toast.makeText(requireContext(),
-                    "Encoder copied ✓\nMissing: ${missing.joinToString(", ")}\n" +
-                    "Copy them manually to:\n${encoderDest.parent}",
-                    Toast.LENGTH_LONG
-                ).show()
+            when {
+                result.encoderPath != null && result.missingFiles.isEmpty() ->
+                    Toast.makeText(requireContext(),
+                        "ONNX model ready ✓ (encoder + decoder + vocab)",
+                        Toast.LENGTH_SHORT).show()
+                result.encoderPath != null ->
+                    Toast.makeText(requireContext(),
+                        "Encoder copied ✓\nMissing in folder: ${result.missingFiles.joinToString(", ")}\n" +
+                        "Add them to the same folder and pick again.",
+                        Toast.LENGTH_LONG).show()
+                else ->
+                    Toast.makeText(requireContext(),
+                        "encoder_model.onnx not found in the selected folder.\n" +
+                        "Make sure the folder contains:\n" +
+                        "  • encoder_model.onnx\n  • decoder_model.onnx\n  • vocab.json",
+                        Toast.LENGTH_LONG).show()
             }
         }
     }
 
-    private suspend fun findSiblingFiles(uri: Uri): Map<String, Uri> =
-        withContext(Dispatchers.IO) {
-            try {
-                val uriStr   = uri.toString()
-                val sep      = "%2F"
-                val lastSep  = uriStr.lastIndexOf(sep).takeIf { it >= 0 }
-                    ?: return@withContext emptyMap()
-                val dirPart  = uriStr.substring(0, lastSep + sep.length)
+    private data class OnnxCopyResult(
+        val encoderPath: String?,
+        val missingFiles: List<String>
+    )
 
-                listOf("decoder_model.onnx", "vocab.json").mapNotNull { name ->
-                    try {
-                        val sibUri = Uri.parse(dirPart + name)
-                        requireContext().contentResolver.openInputStream(sibUri)?.close()
-                        name.lowercase() to sibUri
-                    } catch (e: Exception) { null }
-                }.toMap()
-            } catch (e: Exception) { emptyMap() }
+    private suspend fun copyOnnxFolder(treeUri: Uri): OnnxCopyResult = withContext(Dispatchers.IO) {
+        val tree = DocumentFile.fromTreeUri(requireContext(), treeUri)
+            ?: return@withContext OnnxCopyResult(null, listOf("encoder_model.onnx", "decoder_model.onnx", "vocab.json"))
+
+        val destDir = requireContext().getExternalFilesDir(null) ?: requireContext().filesDir
+
+        // Find each required file inside the tree by name (case-insensitive)
+        fun findFile(name: String): DocumentFile? =
+            tree.listFiles().firstOrNull { it.name.equals(name, ignoreCase = true) }
+
+        val encoderDoc = findFile("encoder_model.onnx")
+        val decoderDoc = findFile("decoder_model.onnx")
+        val vocabDoc   = findFile("vocab.json")
+
+        if (encoderDoc == null) return@withContext OnnxCopyResult(null, listOf("encoder_model.onnx"))
+
+        val missing = mutableListOf<String>()
+
+        // Copy encoder
+        val encoderDest = File(destDir, "encoder_model.onnx")
+        requireContext().contentResolver.openInputStream(encoderDoc.uri)?.use { i ->
+            encoderDest.outputStream().use { o -> i.copyTo(o) }
         }
 
-    private suspend fun copySibling(siblings: Map<String, Uri>, name: String): Boolean {
-        val uri = siblings[name.lowercase()] ?: return false
-        return copyFile(uri, name) != null
+        // Copy decoder
+        if (decoderDoc != null) {
+            requireContext().contentResolver.openInputStream(decoderDoc.uri)?.use { i ->
+                File(destDir, "decoder_model.onnx").outputStream().use { o -> i.copyTo(o) }
+            }
+        } else missing.add("decoder_model.onnx")
+
+        // Copy vocab
+        if (vocabDoc != null) {
+            requireContext().contentResolver.openInputStream(vocabDoc.uri)?.use { i ->
+                File(destDir, "vocab.json").outputStream().use { o -> i.copyTo(o) }
+            }
+        } else missing.add("vocab.json")
+
+        prefs.modelPath = encoderDest.absolutePath
+        OnnxCopyResult(encoderDest.absolutePath, missing)
     }
 
-    // ── Generic file copy ────────────────────────────────────────────────────
-
-    private suspend fun copyFile(uri: Uri, destName: String): File? =
-        withContext(Dispatchers.IO) {
-            try {
-                val dir  = requireContext().getExternalFilesDir(null) ?: requireContext().filesDir
-                val dest = File(dir, destName)
-                requireContext().contentResolver.openInputStream(uri)?.use { i ->
-                    dest.outputStream().use { o -> i.copyTo(o) }
-                }
-                dest
-            } catch (e: Exception) { null }
+    private fun refreshOnnxSummary() {
+        val path   = prefs.modelPath
+        val active = path.endsWith("encoder_model.onnx")
+        val destDir = requireContext().getExternalFilesDir(null) ?: requireContext().filesDir
+        val hasDecoder = File(destDir, "decoder_model.onnx").exists()
+        val hasVocab   = File(destDir, "vocab.json").exists()
+        findPreference<Preference>("pick_model_onnx")?.summary = when {
+            active && hasDecoder && hasVocab -> "✓ Active: encoder + decoder + vocab"
+            active -> "⚠ Active but missing: ${
+                listOfNotNull(
+                    if (!hasDecoder) "decoder_model.onnx" else null,
+                    if (!hasVocab)   "vocab.json" else null
+                ).joinToString(", ")}"
+            else -> "בחר תיקייה עם encoder_model.onnx, decoder_model.onnx ו-vocab.json"
         }
+    }
 
     // ── Audio toggles ────────────────────────────────────────────────────────
 
@@ -207,18 +230,19 @@ class SettingsFragment : PreferenceFragmentCompat() {
         }
     }
 
-    // ── Summary helpers ──────────────────────────────────────────────────────
+    // ── Utilities ────────────────────────────────────────────────────────────
 
-    private fun refreshModelSummary() {
-        val path = prefs.modelPath
-        val summary = if (path.isEmpty()) getString(R.string.no_model_selected)
-        else "${File(path).name}\nEngine: ${EngineFactory.describe(path)}"
-        setPickerSummary(summary)
-    }
-
-    private fun setPickerSummary(text: String) {
-        findPreference<Preference>("pick_model")?.summary = text
-    }
+    private suspend fun copyFile(uri: Uri, destName: String): File? =
+        withContext(Dispatchers.IO) {
+            try {
+                val dir  = requireContext().getExternalFilesDir(null) ?: requireContext().filesDir
+                val dest = File(dir, destName)
+                requireContext().contentResolver.openInputStream(uri)?.use { i ->
+                    dest.outputStream().use { o -> i.copyTo(o) }
+                }
+                dest
+            } catch (e: Exception) { null }
+        }
 
     private fun resolveFileName(uri: Uri): String? =
         try {
