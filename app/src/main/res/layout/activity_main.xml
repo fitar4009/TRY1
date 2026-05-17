@@ -131,6 +131,20 @@
             app:cornerRadius="12dp"
             android:visibility="visible" />
 
+        <!-- TYPE INPUT button -->
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnTypeInput"
+            style="@style/Widget.Material3.Button.OutlinedButton"
+            android:layout_width="match_parent"
+            android:layout_height="64dp"
+            android:layout_marginTop="12dp"
+            android:text="⌨ הקלד שם או מספר"
+            android:textSize="18sp"
+            app:strokeColor="@color/text_secondary"
+            android:textColor="@color/text_secondary"
+            app:cornerRadius="12dp"
+            android:visibility="visible" />
+
     </LinearLayout>
 
 </androidx.coordinatorlayout.widget.CoordinatorLayout>
