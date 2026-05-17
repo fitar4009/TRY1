@@ -8,10 +8,25 @@
         android:title="@string/pref_category_model"
         app:iconSpaceReserved="false">
 
+        <!-- Single picker — handles .bin/.gguf (GGML) and encoder_model.onnx (ONNX) -->
         <Preference
             android:key="pick_model"
             android:title="@string/pref_model_path_title"
             android:summary="@string/no_model_selected"
+            app:iconSpaceReserved="false" />
+
+    </PreferenceCategory>
+
+    <!-- Input method category -->
+    <PreferenceCategory
+        android:title="אפשרויות קלט"
+        app:iconSpaceReserved="false">
+
+        <SwitchPreferenceCompat
+            android:key="allow_text_input"
+            android:title="אפשר הקלדה ידנית"
+            android:summary="הצג כפתור להקלדת שם או מספר במקום דיבור"
+            android:defaultValue="true"
             app:iconSpaceReserved="false" />
 
     </PreferenceCategory>

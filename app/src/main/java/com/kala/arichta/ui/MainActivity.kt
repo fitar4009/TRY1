@@ -2,6 +2,8 @@ package com.kala.arichta.ui
 
 import android.Manifest
 import android.content.Intent
+import android.text.InputType
+import android.widget.EditText
 import android.content.pm.PackageManager
 import android.net.Uri
 import android.os.Bundle
@@ -120,6 +122,7 @@ class MainActivity : AppCompatActivity() {
             recorder.stopRecording()
         }
 
+        binding.btnTypeInput.setOnClickListener { showTextInputDialog() }
         binding.btnRetry.setOnClickListener {
             startListeningSession()
         }
@@ -418,6 +421,29 @@ class MainActivity : AppCompatActivity() {
             .setMessage(getString(R.string.no_contacts_message,
                 contactRepo.getContactsFilePath()))
             .setPositiveButton(android.R.string.ok, null)
+            .show()
+    }
+
+    // ── Text input dialog ────────────────────────────────────────────────────
+
+    private fun showTextInputDialog() {
+        val input = EditText(this).apply {
+            hint = "שם איש קשר או מספר טלפון"
+            inputType = InputType.TYPE_CLASS_TEXT
+            textDirection = View.TEXT_DIRECTION_RTL
+            textAlignment = View.TEXT_ALIGNMENT_VIEW_END
+        }
+        AlertDialog.Builder(this)
+            .setTitle("הקלד שם או מספר")
+            .setView(input)
+            .setPositiveButton("חייג") { _, _ ->
+                val text = input.text.toString().trim()
+                if (text.isNotEmpty()) {
+                    binding.transcriptText.text = text
+                    processTranscript(HebrewCommandParser.extractTarget(text))
+                }
+            }
+            .setNegativeButton(android.R.string.cancel, null)
             .show()
     }
 

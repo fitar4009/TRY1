@@ -15,12 +15,14 @@ class AppPreferences(context: Context) {
         const val KEY_AUDIO_DUCK       = "audio_duck_only"
         const val KEY_VAD_TIMEOUT_MS   = "vad_timeout_ms"
         const val KEY_MATCH_THRESHOLD  = "match_threshold"
+        const val KEY_ALLOW_TEXT_INPUT = "allow_text_input"
 
         // Defaults
         const val DEFAULT_AUDIO_FOCUS    = true
         const val DEFAULT_AUDIO_DUCK     = true
         const val DEFAULT_VAD_TIMEOUT_MS = 1500
         const val DEFAULT_MATCH_THRESHOLD = 60
+        const val DEFAULT_ALLOW_TEXT_INPUT = true
     }
 
     private val prefs: SharedPreferences =
@@ -41,6 +43,10 @@ class AppPreferences(context: Context) {
     var vadTimeoutMs: Int
         get() = prefs.getInt(KEY_VAD_TIMEOUT_MS, DEFAULT_VAD_TIMEOUT_MS)
         set(v) = prefs.edit().putInt(KEY_VAD_TIMEOUT_MS, v).apply()
+
+    var allowTextInput: Boolean
+        get() = prefs.getBoolean(KEY_ALLOW_TEXT_INPUT, DEFAULT_ALLOW_TEXT_INPUT)
+        set(v) = prefs.edit().putBoolean(KEY_ALLOW_TEXT_INPUT, v).apply()
 
     var matchThreshold: Int
         get() = prefs.getInt(KEY_MATCH_THRESHOLD, DEFAULT_MATCH_THRESHOLD)
