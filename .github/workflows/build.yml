@@ -1,0 +1,74 @@
+name: Build Debug APK
+
+on:
+  push:
+    branches: [ main, master ]
+  pull_request:
+    branches: [ main, master ]
+  workflow_dispatch:
+
+jobs:
+  build:
+    name: Assemble Debug APK
+    runs-on: ubuntu-latest
+
+    steps:
+      # ── 1. Checkout ──────────────────────────────────────────────────────────
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      # ── 2. JDK 17 ────────────────────────────────────────────────────────────
+      #   AGP 8.4.x requires Java 17.
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+          cache: gradle
+
+      # ── 3. Android SDK ───────────────────────────────────────────────────────
+      - name: Set up Android SDK
+        uses: android-actions/setup-android@v3
+
+      - name: Install SDK packages
+        run: |
+          yes | sdkmanager --licenses > /dev/null 2>&1
+          sdkmanager "platforms;android-34" "build-tools;34.0.0" "platform-tools"
+
+      # ── 4. Gradle wrapper ────────────────────────────────────────────────────
+      #   The project ZIP ships without gradlew — generate it from the
+      #   system Gradle (same approach as the Colab notebook, Cell 6).
+      - name: Install Gradle 8.6
+        uses: gradle/actions/setup-gradle@v3
+        with:
+          gradle-version: '8.6'
+
+      - name: Generate Gradle wrapper
+        run: |
+          gradle wrapper --gradle-version 8.6 --distribution-type bin
+          chmod +x gradlew
+
+      # ── 5. Gradle cache ──────────────────────────────────────────────────────
+      - name: Cache Gradle dependencies
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.gradle/caches
+            ~/.gradle/wrapper
+          key: gradle-${{ runner.os }}-${{ hashFiles('**/*.gradle*', '**/libs.versions.toml') }}
+          restore-keys: |
+            gradle-${{ runner.os }}-
+
+      # ── 6. Build ─────────────────────────────────────────────────────────────
+      - name: Build debug APK
+        run: ./gradlew assembleDebug --stacktrace
+        env:
+          ANDROID_HOME: ${{ env.ANDROID_SDK_ROOT }}
+
+      # ── 7. Upload artifact ───────────────────────────────────────────────────
+      - name: Upload APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: app-debug
+          path: app/build/outputs/apk/debug/*.apk
+          retention-days: 14

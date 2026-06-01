@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    FileProvider paths for the contacts TXT file.
+    The app's external files directory maps to:
+      Android/data/com.qalaarikha.assistant/files/
+    which is the default location for contacts.txt.
+-->
+<paths>
+    <external-files-path
+        name="external_files"
+        path="." />
+</paths>

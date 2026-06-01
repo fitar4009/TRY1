@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <!-- App -->
+    <string name="app_name">קלא אריכתא</string>
+
+    <!-- Assistant states (shown in UI) -->
+    <string name="state_idle">ממתין</string>
+    <string name="state_listening">מאזין</string>
+    <string name="state_processing">מעבד</string>
+    <string name="state_speaking">מדבר</string>
+    <string name="state_error">שגיאה</string>
+    <string name="state_dictating">מכתיב</string>
+
+    <!-- TTS speech strings -->
+    <string name="tts_calling">מתקשר ל%s.</string>
+    <string name="tts_multiple_contacts_found">נמצאו מספר אנשי קשר.</string>
+    <string name="tts_say_1_2_3">אמור 1, 2 או 3.</string>
+    <string name="tts_contact_not_found">לא נמצא איש קשר בשם %s.</string>
+    <string name="tts_confirm_dial">זיהיתי את %s. לחייג?</string>
+    <string name="tts_call_cancelled">השיחה בוטלה.</string>
+    <string name="tts_not_understood">לא הבנתי. אנא נסה שוב.</string>
+    <string name="tts_say_yes_or_no">אנא אמור כן או לא.</string>
+    <string name="tts_invalid_selection">בחירה לא תקינה. אנא אמור 1, 2 או 3.</string>
+    <string name="tts_dictation_on">מצב הכתבה פעיל.</string>
+    <string name="tts_dictation_off">מצב הכתבה כובה.</string>
+
+    <!-- Error messages -->
+    <string name="error_permission_audio">נדרשת הרשאת מיקרופון.</string>
+    <string name="error_not_available">זיהוי דיבור אינו זמין.</string>
+    <string name="error_recognizer_busy">מנוע הדיבור עסוק. נסה שנית.</string>
+    <string name="error_generic">שגיאה. קוד: %d</string>
+
+    <!-- Settings labels -->
+    <string name="settings_title">הגדרות</string>
+    <string name="settings_fuzzy_threshold">סף התאמה מינימלי</string>
+    <string name="settings_fuzzy_threshold_desc">%d%%</string>
+    <string name="settings_dial_immediately">חייג מיידית</string>
+    <string name="settings_dial_immediately_desc">ללא בקשת אישור קולי</string>
+    <string name="settings_contacts_file">קובץ אנשי קשר</string>
+    <string name="settings_contacts_file_hint">נתיב לקובץ contacts.txt</string>
+    <string name="settings_reload_contacts">טען אנשי קשר מחדש</string>
+    <string name="settings_contacts_reloaded">אנשי קשר נטענו מחדש.</string>
+    <string name="settings_silence_length">זמן שתיקה (ms)</string>
+
+    <!-- Home screen labels -->
+    <string name="btn_start_listening">התחל האזנה</string>
+    <string name="btn_stop_listening">עצור האזנה</string>
+    <string name="btn_exit_dictation">יציאה מהכתבה</string>
+    <string name="btn_copy_text">העתק</string>
+    <string name="label_contacts_loaded">%d אנשי קשר</string>
+    <string name="label_dictation_text">טקסט מוכתב</string>
+    <string name="label_candidates">אנשי קשר תואמים</string>
+    <string name="label_partial">%s…</string>
+
+    <!-- Warnings -->
+    <string name="offline_warning">אזהרה: לא נמצא מודל זיהוי דיבור מקומי לעברית.\nהוסף מודל דרך: הגדרות → שפה וקלט → זיהוי דיבור → Google → הורד שפות לא מקוון.</string>
+
+    <!-- Theme (required by AppCompat) -->
+    <style name="Theme.QalaArikha" parent="android:Theme.Material.Light.NoActionBar" />
+
+</resources>
